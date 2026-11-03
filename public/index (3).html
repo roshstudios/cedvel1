@@ -1,0 +1,104 @@
+<!doctype html><html lang="az"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Cədvəlim">
+<meta name="theme-color" content="#0b1220"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png">
+<title>Cədvəlim</title>
+<style>
+:root{--bg:#e8edf5;--card:#fff;--ink:#0f1b33;--mut:#6b7690;--line:#d6dded;--ac:#2f5bff;--hero:#2f5bff;--now:#19c38a;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#141d31;--ink:#eef2fb;--mut:#8995b1;--line:#222d46;--hero:#2f5bff;color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.35 -apple-system,"SF Pro Text",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(96px + env(safe-area-inset-bottom))}
+#app{max-width:560px;margin:auto;padding:18px 16px}
+h1{font-size:30px;letter-spacing:-.8px;margin:0}h3{margin:0;font-size:17px}small,.mut{color:var(--mut)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.wk{border-radius:22px;padding:8px 14px;background:var(--card);text-align:right;line-height:1.2}.wk b{display:block;font-size:15px}.wk small{font-size:12px}
+.wk.upper b{color:#ff8a1f}.wk.lower b{color:var(--ac)}
+.cap{display:inline-block;border:0;border-radius:99px;padding:6px 12px;font:600 13px/1 inherit;font-family:inherit;background:var(--line);color:var(--ink);font-style:normal;white-space:nowrap}
+button.cap{padding:10px 16px;font-size:14px}.cap.on{background:var(--ac);color:#fff}.cap.w{background:transparent;border:1px solid var(--line);color:var(--mut)}
+.hero{background:var(--hero);color:#fff;border-radius:32px;padding:22px;margin-bottom:22px}
+.hero small{color:#cfd9ff;font-size:13px}.hero h2{font-size:25px;letter-spacing:-.5px;margin:4px 0 14px}.hero .cap{background:rgba(255,255,255,.2);color:#fff;margin-right:6px}
+.hero p{margin:14px 0 0;font-size:14px;color:#dbe3ff}.bar{height:8px;border-radius:9px;background:rgba(255,255,255,.25);margin-top:16px;overflow:hidden}.bar u{display:block;height:100%;background:var(--now);border-radius:9px}
+section{margin-bottom:22px}.dh{display:flex;align-items:baseline;gap:10px;margin:0 4px 10px}.dh span{color:var(--mut);font-size:14px;flex:1}
+.lc{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:26px;padding:12px 14px 12px 12px;margin-bottom:8px}
+.lc.on{outline:2px solid var(--now)}.tm{background:var(--bg);border-radius:18px;padding:8px 10px;text-align:center;min-width:64px}.tm b{display:block}.tm span{font-size:12px;color:var(--mut)}
+.bd{flex:1;min-width:0}.nm{font-weight:600}.sb{font-size:13px;color:var(--mut)}.empty{background:var(--card);border-radius:26px;padding:16px;color:var(--mut);text-align:center}
+nav{position:fixed;left:0;right:0;margin:auto;width:max-content;max-width:calc(100% - 16px);bottom:calc(12px + env(safe-area-inset-bottom));display:flex;gap:4px;background:var(--card);padding:6px;border-radius:99px;box-shadow:0 8px 30px rgba(10,20,50,.25)}
+nav button{white-space:nowrap;border:0;background:none;color:var(--mut);font:600 14px inherit;font-family:inherit;padding:11px 15px;border-radius:99px}nav button.on{background:var(--ink);color:var(--bg)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.btn{display:block;text-align:center;background:var(--ac);color:#fff;border-radius:99px;padding:16px;font-weight:700;margin:16px 0}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:6px}
+.ed{background:var(--card);border-radius:24px;padding:12px;margin-bottom:8px}.g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.warn{color:#ff8a1f;display:block;margin-bottom:6px}
+#toast{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:9}#toast.s{opacity:1}
+</style></head><body><div id="app"></div><div id="toast"></div>
+<nav><button data-t="home" onclick="go('home')">Bu gün</button><button data-t="week" onclick="go('week')">Cədvəl</button><button data-t="friends" onclick="go('friends')">Dostlar</button><button data-t="upl" onclick="go('upl')">Yüklə</button></nav>
+<script>
+const loadPdf=()=>window.pdfjsLib?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';ok()};s.onerror=()=>no(Error('PDF kitabxanası yüklənmədi'));document.head.appendChild(s)});
+const $=s=>document.querySelector(s),LS=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}};
+let me=LS('me')||{name:'',group:'',entries:[]},tab='home',draft=null,PD=null,ww=null,flip=+localStorage.flip||0;
+const save=()=>localStorage.me=JSON.stringify(me);
+const DN=['Bazar ertəsi','Çərşənbə axşamı','Çərşənbə','Cümə axşamı','Cümə'],MN=['yan','fev','mar','apr','may','iyn','iyl','avq','sen','okt','noy','dek'],WN={lower:'Alt həftə',upper:'Üst həftə'};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// 2 Noyabr 2026 həftəsi = Alt həftə
+const wk=d=>{const m=new Date(d);m.setHours(0,0,0,0);m.setDate(m.getDate()-(m.getDay()+6)%7);const w=Math.round((m-new Date(2026,10,2))/6048e5)+flip;return((w%2)+2)%2?'upper':'lower'};
+const mins=t=>{const[a,b]=String(t).split(':');return+a*60+ +b},add=(t,n)=>{n+=mins(t);return String(n/60|0).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};
+const by=(E,k,w)=>E.filter(e=>e.day==k+1&&(e.week=='both'||e.week==w)).sort((a,b)=>mins(a.start)-mins(b.start));
+const same=(a,b)=>a.toDateString()==b.toDateString();
+const card=(e,on)=>`<div class="lc${on?' on':''}"><div class=tm><b>${esc(e.start)}</b><span>${esc(e.end)}</span></div><div class=bd><div class=nm>${esc(e.name)}</div><div class=sb>${esc(e.teacher)}</div></div>${e.room?`<i class=cap>${esc(e.room)}</i>`:''}${e.week!='both'?`<i class="cap w">${e.week=='upper'?'Üst':'Alt'}</i>`:''}</div>`;
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('s');setTimeout(()=>e.classList.remove('s'),2600)}
+function hdr(){const n=new Date(),x=new Date(n);x.setDate(x.getDate()+7);return`<div class=top><div><small>${n.getDate()} ${MN[n.getMonth()]}</small><h1>${me.name?'Salam, '+esc(me.name):'Cədvəlim'}</h1></div><div class="wk ${wk(n)}"><b>${WN[wk(n)]}</b><small>Gələn: ${WN[wk(x)]}</small></div></div>`}
+function view(E){
+ const now=new Date(),nm=now.getHours()*60+now.getMinutes(),ds=[];let d=new Date();d.setHours(0,0,0,0);
+ while(ds.length<5){if(d.getDay()%6)ds.push(new Date(d));d.setDate(d.getDate()+1)}
+ let cur,nx;
+ for(const x of ds){const L=by(E,(x.getDay()+6)%7,wk(x)),t=same(x,now);if(t)cur=L.find(e=>mins(e.start)<=nm&&nm<mins(e.end));const n=L.find(e=>!t||mins(e.start)>nm);if(n&&!nx)nx={e:n,d:x,t}}
+ const dn=x=>DN[(x.getDay()+6)%7];let h;
+ if(cur){const p=Math.round((nm-mins(cur.start))/(mins(cur.end)-mins(cur.start))*100);h=`<div class=hero><small>İndi davam edir</small><h2>${esc(cur.name)}</h2><i class=cap>${esc(cur.start)}–${esc(cur.end)}</i>${cur.room?`<i class=cap>${esc(cur.room)}</i>`:''}<div class=bar><u style="width:${p}%"></u></div>${nx?`<p>Sonra: ${esc(nx.e.name)}, ${nx.t?'':dn(nx.d)+' '}${esc(nx.e.start)}</p>`:''}</div>`}
+ else if(nx){const m=mins(nx.e.start)-nm;h=`<div class=hero><small>Növbəti dərs · ${nx.t?(m>=60?Math.floor(m/60)+' saat '+m%60+' dəq sonra':m+' dəq sonra'):dn(nx.d)}</small><h2>${esc(nx.e.name)}</h2><i class=cap>${esc(nx.e.start)}–${esc(nx.e.end)}</i>${nx.e.room?`<i class=cap>${esc(nx.e.room)}</i>`:''}</div>`}
+ else h=`<div class=hero><h2>Bu həftə dərs qalmayıb</h2></div>`;
+ return h+ds.map(x=>{const t=same(x,now),L=by(E,(x.getDay()+6)%7,wk(x));return`<section><div class=dh><h3>${t?'Bu gün':dn(x)}</h3><span>${t?dn(x)+', ':''}${x.getDate()} ${MN[x.getMonth()]}</span><i class="cap w">${WN[wk(x)]}</i></div>${L.map(e=>card(e,e==cur)).join('')||'<div class=empty>Dərs yoxdur</div>'}</section>`}).join('')}
+function weekView(E){ww=ww||wk(new Date());return`<div class=row>${['lower','upper'].map(w=>`<button class="cap${ww==w?' on':''}" onclick="ww='${w}';render()">${WN[w]}</button>`).join('')}</div>`+DN.map((n,k)=>{const L=by(E,k,ww);return`<section><div class=dh><h3>${n}</h3></div>${L.map(e=>card(e)).join('')||'<div class=empty>Dərs yoxdur</div>'}</section>`}).join('')}
+const cta=()=>`<div class=hero><h2>Cədvəlini yüklə</h2><p>PDF cədvəli yüklə, AI qrupunun dərslərini çıxarsın, sən təsdiq et.</p></div><button class=btn style="border:0;width:100%" onclick="go('upl')">Cədvəl yüklə</button>`;
+function go(t){tab=t;draft=null;render()}
+function render(){const a=$('#app');
+ if(tab=='home')a.innerHTML=hdr()+(me.entries.length?view(me.entries):cta());
+ else if(tab=='week')a.innerHTML=hdr()+(me.entries.length?weekView(me.entries):cta());
+ else if(tab=='friends')friends();else upl();
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab))}
+async function friends(){$('#app').innerHTML=hdr()+'<h3>Açıq cədvəllər</h3><p class=mut>Yüklənir…</p>';
+ try{const l=await(await fetch('/api/share')).json();$('#app').innerHTML=hdr()+'<h3 style="margin-bottom:10px">Açıq cədvəllər</h3>'+(l.map(f=>`<div class=lc onclick="openF('${f.id}')"><div class=bd><div class=nm>${esc(f.name)}</div><div class=sb>${esc(f.group)}</div></div><i class=cap>Bax</i></div>`).join('')||'<div class=empty>Hələ heç kim paylaşmayıb</div>')}catch{$('#app').innerHTML=hdr()+'<div class=empty>Bağlantı xətası</div>'}}
+async function openF(id){const d=await(await fetch('/api/share?id='+id)).json();$('#app').innerHTML=`<div class=row><button class=cap onclick="go('friends')">Geri</button></div><h1>${esc(d.name)}</h1><p class=mut>${esc(d.group)}</p>`+view(d.entries)}
+const settings=()=>`<section><div class=dh><h3>Profil və paylaşım</h3></div><input placeholder="Adın" value="${esc(me.name)}" onchange="me.name=this.value.trim();save()"><div class=row><button class=cap onclick="pub()">${me.id?'Açıq cədvəli yenilə':'Hamıya açıq paylaş'}</button>${me.id?'<button class=cap onclick="unpub()">Paylaşımı sil</button>':''}</div><button class=cap onclick="flip^=1;localStorage.flip=flip;render();toast('Həftə çevrildi')">Həftə səhvdir? Alt/Üst çevir</button></section>`;
+async function pub(){if(!me.name)return toast('Əvvəlcə adını yaz');if(!me.entries.length)return toast('Cədvəl yoxdur');
+ const r=await fetch('/api/share',{method:'POST',body:JSON.stringify(me)}),j=await r.json();if(!r.ok)return toast(j.error);me.id=j.id;me.tok=j.tok;save();render();toast('Paylaşıldı')}
+async function unpub(){await fetch(`/api/share?id=${me.id}&tok=${me.tok}`,{method:'DELETE'});delete me.id;delete me.tok;save();render();toast('Paylaşım silindi')}
+function upl(){$('#app').innerHTML=`<h1>Cədvəl yüklə</h1><p class=mut>PDF cədvəli seç. Qrupunu seçəndən sonra AI dərslərini çıxaracaq, sən yoxlayıb təsdiq edəcəksən.</p><label class=btn>PDF seç<input type=file accept=application/pdf hidden onchange="onPdf(this.files[0])"></label>`+settings()}
+const busy=t=>$('#app').innerHTML=`<div class=hero><h2>${t}</h2></div>`;
+async function onPdf(f){if(!f)return;busy('PDF oxunur…');
+ try{await loadPdf();const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,re=/^[A-ZƏİÖÜŞÇĞ]{2,5}-\d{1,3}$/;let best=null;
+  for(let n=1;n<=pdf.numPages;n++){const pg=await pdf.getPage(n),vp=pg.getViewport({scale:1}),tc=await pg.getTextContent();
+   const items=tc.items.filter(i=>i.str.trim()).map(i=>({t:i.str.trim(),x:i.transform[4]+i.width/2,y:vp.height-i.transform[5]})),c=[];
+   items.filter(i=>re.test(i.t)).forEach(i=>{if(!c.some(z=>z.t==i.t))c.push(i)});if(!best||c.length>best.c.length)best={w:vp.width,items,c}}
+  if(!best||best.c.length<2)throw Error('Qrup başlıqları tapılmadı');PD=best;
+  $('#app').innerHTML=`<h1>Qrupunu seç</h1><div class=row>${best.c.map(c=>`<button class=cap onclick="pick('${c.t}')">${esc(c.t)}</button>`).join('')}</div>`}
+ catch(e){upl();toast(e.message)}}
+async function pick(g){busy('AI cədvəli oxuyur…');
+ try{const{w,items:all,c}=PD,col=c.find(x=>x.t==g),hy=c.reduce((s,x)=>s+x.y,0)/c.length,minX=Math.min(...c.map(x=>x.x))-30,B=all.filter(i=>i.y>hy+4);
+  const L=B.filter(i=>i.x<minX),days=L.filter(i=>/^(I|II|III|IV|V)$/.test(i.t)).sort((a,b)=>a.y-b.y),tm=L.filter(i=>/^\d{1,2}:\d{2}$/.test(i.t)).sort((a,b)=>a.y-b.y);
+  if(!days.length||!tm.length)throw Error('Gün/saat sütunu tapılmadı');
+  const near=(a,y)=>a.reduce((b,v,i)=>Math.abs(v.y-y)<Math.abs(a[b].y-y)?i:b,0);
+  const slots=tm.map((t,i)=>({i,day:near(days,t.y)+1,time:t.t.padStart(5,'0')}));
+  const items=B.filter(i=>i.x>=minX&&Math.abs(i.x-col.x)<w*.3).sort((a,b)=>Math.abs(a.x-col.x)-Math.abs(b.x-col.x)).slice(0,450).map(i=>[near(tm,i.y),Math.round(i.x),Math.round(i.y),i.t]);
+  const r=await fetch('/api/parse',{method:'POST',body:JSON.stringify({group:g,colX:Math.round(col.x),cols:c.map(x=>({n:x.t,x:Math.round(x.x)})),slots,items})}),j=await r.json();
+  if(!r.ok)throw Error(j.error||'AI xətası');
+  draft={group:g,sub:0,entries:(j.entries||[]).filter(e=>e.name&&e.day>=1&&e.day<=5).map(e=>({...e,teacher:e.teacher||'',room:e.room||'',end:e.end||add(e.start,85),week:e.week||'both'}))};review()}
+ catch(e){upl();toast(e.message)}}
+function review(){const E=draft.entries,subs=E.some(e=>e.sub),f=e=>!e.sub||!draft.sub||e.sub==draft.sub;
+ $('#app').innerHTML=`<h1>Yoxla: ${esc(draft.group)}</h1><p class=mut>AI-nin tapdıqlarını cədvəllə müqayisə et, səhvləri düzəlt, sonra təsdiq et. Dərs sonu vaxtı 85 dəq. təxmin edilib.</p>`+(subs?`<div class=row>Yarımqrup: ${[1,2].map(n=>`<button class="cap${draft.sub==n?' on':''}" onclick="draft.sub=${n};review()">${n}</button>`).join('')}</div>`:'')+
+ [1,2,3,4,5].map(d=>`<section><div class=dh><h3>${DN[d-1]}</h3></div>${E.map((e,i)=>({e,i})).filter(({e})=>e.day==d&&f(e)).sort((a,b)=>mins(a.e.start)-mins(b.e.start)).map(({e,i})=>`<div class=ed>${e.note?`<small class=warn>Yoxla: ${esc(e.note)}</small>`:''}<input data-i=${i} data-f=name value="${esc(e.name)}" placeholder="Fənn"><div class=g><input data-i=${i} data-f=start type=time value="${esc(e.start)}"><input data-i=${i} data-f=end type=time value="${esc(e.end)}"><input data-i=${i} data-f=room value="${esc(e.room)}" placeholder="Otaq"></div><div class=g><input data-i=${i} data-f=teacher value="${esc(e.teacher)}" placeholder="Müəllim"><select data-i=${i} data-f=week>${[['both','Hər həftə'],['upper','Üst həftə'],['lower','Alt həftə']].map(([v,l])=>`<option value=${v}${e.week==v?' selected':''}>${l}</option>`).join('')}</select><button class=cap onclick="draft.entries.splice(${i},1);review()">Sil</button></div></div>`).join('')||'<div class=empty>Dərs yoxdur</div>'}<button class=cap onclick="draft.entries.push({day:${d},start:'08:30',end:'09:55',name:'',teacher:'',room:'',week:'both'});review()">Dərs əlavə et</button></section>`).join('')+`<button class=btn style="border:0;width:100%" onclick="ok()">Təsdiq et və yadda saxla</button>`}
+document.addEventListener('change',e=>{const t=e.target;if(draft&&t.dataset.f)draft.entries[t.dataset.i][t.dataset.f]=t.value});
+function ok(){if(draft.entries.some(e=>e.sub)&&!draft.sub)return toast('Yarımqrupu seç');
+ me.entries=draft.entries.filter(e=>e.name&&(!e.sub||e.sub==draft.sub)).map(({sub,note,...e})=>e);me.group=draft.group;draft=null;save();tab='home';render();toast('Yadda saxlandı');if(me.id)pub()}
+try{render()}catch(e){$('#app').innerHTML='<div class=empty>Xəta: '+esc(e.message)+'</div>'}
+setInterval(()=>{if(tab=='home'&&!draft)render()},60000);
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js');
+</script></body></html>
