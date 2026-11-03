@@ -45,7 +45,7 @@ const by=(E,k,w)=>E.filter(e=>e.day==k+1&&(e.week=='both'||e.week==w)).sort((a,b
 const same=(a,b)=>a.toDateString()==b.toDateString();
 const card=(e,on)=>`<div class="lc${on?' on':''}"><div class=tm><b>${esc(e.start)}</b><span>${esc(e.end)}</span></div><div class=bd><div class=nm>${esc(e.name)}</div><div class=sb>${esc(e.teacher)}</div></div>${e.room?`<i class=cap>${esc(e.room)}</i>`:''}${e.week!='both'?`<i class="cap w">${e.week=='upper'?'Üst':'Alt'}</i>`:''}</div>`;
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('s');setTimeout(()=>e.classList.remove('s'),2600)}
-function top(){const n=new Date(),x=new Date(n);x.setDate(x.getDate()+7);return`<div class=top><div><small>${n.getDate()} ${MN[n.getMonth()]}</small><h1>${me.name?'Salam, '+esc(me.name):'Cədvəlim'}</h1></div><div class="wk ${wk(n)}"><b>${WN[wk(n)]}</b><small>Gələn: ${WN[wk(x)]}</small></div></div>`}
+function hdr(){const n=new Date(),x=new Date(n);x.setDate(x.getDate()+7);return`<div class=top><div><small>${n.getDate()} ${MN[n.getMonth()]}</small><h1>${me.name?'Salam, '+esc(me.name):'Cədvəlim'}</h1></div><div class="wk ${wk(n)}"><b>${WN[wk(n)]}</b><small>Gələn: ${WN[wk(x)]}</small></div></div>`}
 function view(E){
  const now=new Date(),nm=now.getHours()*60+now.getMinutes(),ds=[];let d=new Date();d.setHours(0,0,0,0);
  while(ds.length<5){if(d.getDay()%6)ds.push(new Date(d));d.setDate(d.getDate()+1)}
@@ -60,12 +60,12 @@ function weekView(E){ww=ww||wk(new Date());return`<div class=row>${['lower','upp
 const cta=()=>`<div class=hero><h2>Cədvəlini yüklə</h2><p>PDF cədvəli yüklə, AI qrupunun dərslərini çıxarsın, sən təsdiq et.</p></div><button class=btn style="border:0;width:100%" onclick="go('upl')">Cədvəl yüklə</button>`;
 function go(t){tab=t;draft=null;render()}
 function render(){const a=$('#app');
- if(tab=='home')a.innerHTML=top()+(me.entries.length?view(me.entries):cta());
- else if(tab=='week')a.innerHTML=top()+(me.entries.length?weekView(me.entries):cta());
+ if(tab=='home')a.innerHTML=hdr()+(me.entries.length?view(me.entries):cta());
+ else if(tab=='week')a.innerHTML=hdr()+(me.entries.length?weekView(me.entries):cta());
  else if(tab=='friends')friends();else upl();
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab))}
-async function friends(){$('#app').innerHTML=top()+'<h3>Açıq cədvəllər</h3><p class=mut>Yüklənir…</p>';
- try{const l=await(await fetch('/api/share')).json();$('#app').innerHTML=top()+'<h3 style="margin-bottom:10px">Açıq cədvəllər</h3>'+(l.map(f=>`<div class=lc onclick="openF('${f.id}')"><div class=bd><div class=nm>${esc(f.name)}</div><div class=sb>${esc(f.group)}</div></div><i class=cap>Bax</i></div>`).join('')||'<div class=empty>Hələ heç kim paylaşmayıb</div>')}catch{$('#app').innerHTML=top()+'<div class=empty>Bağlantı xətası</div>'}}
+async function friends(){$('#app').innerHTML=hdr()+'<h3>Açıq cədvəllər</h3><p class=mut>Yüklənir…</p>';
+ try{const l=await(await fetch('/api/share')).json();$('#app').innerHTML=hdr()+'<h3 style="margin-bottom:10px">Açıq cədvəllər</h3>'+(l.map(f=>`<div class=lc onclick="openF('${f.id}')"><div class=bd><div class=nm>${esc(f.name)}</div><div class=sb>${esc(f.group)}</div></div><i class=cap>Bax</i></div>`).join('')||'<div class=empty>Hələ heç kim paylaşmayıb</div>')}catch{$('#app').innerHTML=hdr()+'<div class=empty>Bağlantı xətası</div>'}}
 async function openF(id){const d=await(await fetch('/api/share?id='+id)).json();$('#app').innerHTML=`<div class=row><button class=cap onclick="go('friends')">Geri</button></div><h1>${esc(d.name)}</h1><p class=mut>${esc(d.group)}</p>`+view(d.entries)}
 const settings=()=>`<section><div class=dh><h3>Profil və paylaşım</h3></div><input placeholder="Adın" value="${esc(me.name)}" onchange="me.name=this.value.trim();save()"><div class=row><button class=cap onclick="pub()">${me.id?'Açıq cədvəli yenilə':'Hamıya açıq paylaş'}</button>${me.id?'<button class=cap onclick="unpub()">Paylaşımı sil</button>':''}</div><button class=cap onclick="flip^=1;localStorage.flip=flip;render();toast('Həftə çevrildi')">Həftə səhvdir? Alt/Üst çevir</button></section>`;
 async function pub(){if(!me.name)return toast('Əvvəlcə adını yaz');if(!me.entries.length)return toast('Cədvəl yoxdur');
