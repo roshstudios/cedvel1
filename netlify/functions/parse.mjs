@@ -8,16 +8,20 @@ Rules:
 4. start = slot time unless the cell states another time (e.g. "13:50"), then use that time. Format HH:MM.
 5. Never invent lessons. Skip cells not covering the target. If unsure, set "note" explaining why.
 Return ONLY JSON: {"entries":[{"day":1,"start":"08:30","name":"","teacher":"","room":"","week":"both|upper|lower","sub":null,"note":""}]}`;
+const ask=(key,model,b,json)=>fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},
+ body:JSON.stringify({model,temperature:0,max_completion_tokens:8000,...(json?{response_format:{type:'json_object'}}:{}),messages:[{role:'system',content:P},{role:'user',content:JSON.stringify(b)}]})});
 export default async (req)=>{
  if(req.method!=='POST')return new Response('',{status:405});
  const b=await req.json().catch(()=>null);
  if(!b||!Array.isArray(b.items)||JSON.stringify(b).length>90000)return Response.json({error:'Yanlış sorğu'},{status:400});
+ b.items=b.items.slice(0,320);
  const key=Netlify.env.get('GROQ_API_KEY');
  if(!key)return Response.json({error:'GROQ_API_KEY təyin edilməyib'},{status:500});
- const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},
-  body:JSON.stringify({model:'llama-3.3-70b-versatile',temperature:0,response_format:{type:'json_object'},messages:[{role:'system',content:P},{role:'user',content:JSON.stringify(b)}]})});
+ const model=Netlify.env.get('GROQ_MODEL')||'openai/gpt-oss-120b';
+ let r=await ask(key,model,b,true);
+ if(r.status===400)r=await ask(key,model,b,false);
  const j=await r.json();
  if(!r.ok)return Response.json({error:j.error?.message||'Groq xətası'},{status:502});
- try{return Response.json(JSON.parse(j.choices[0].message.content))}catch{return Response.json({error:'AI cavabı oxunmadı'},{status:502})}
+ try{const t=j.choices[0].message.content;return Response.json(JSON.parse(t.slice(t.indexOf('{'),t.lastIndexOf('}')+1)))}catch{return Response.json({error:'AI cavabı oxunmadı'},{status:502})}
 };
 export const config={path:'/api/parse'};
